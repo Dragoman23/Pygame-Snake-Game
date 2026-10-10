@@ -79,6 +79,23 @@ while True:
         player_x += player_vel_x
         player_y += player_vel_y
 
+        if player_vel_x > 0:
+            adder_x = player_x - player.get_width()
+            adder_y = player_y
+
+        if player_vel_x < 0:
+            adder_x = player_x + player.get_width()
+            adder_y = player_y
+
+        if player_vel_y > 0:
+            adder_x = player_x
+            adder_y = player_y - player.get_height()
+
+        if player_vel_y < 0:
+            adder_x = player_x
+            adder_y = player_y + player.get_height()
+
+        window.blit(adder, (adder_x, adder_y))
         window.blit(player, (player_x,player_y))
 
 
