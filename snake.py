@@ -35,6 +35,11 @@ object_vel_y = 0
 
 player_x, player_y = snake_segments[0]
 
+font = pygame.font.SysFont('Arial', 30)
+text = font.render(f'Score: {score}', True, (255, 0, 0))
+textRect = text.get_rect()
+textRect.center = (800 // 2, 30)
+
 def collision_detection():
     player_x, player_y = snake_segments[0]
     return (player_x <= (object_x + int(object.get_width())) and
@@ -54,25 +59,48 @@ while True:
             quit(0)
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT and player_vel_x == 0:
-                player_vel_x = -size
-                player_vel_y = 0
-            if event.key == pygame.K_RIGHT and player_vel_x == 0:
-                player_vel_x = size
-                player_vel_y = 0
-            if event.key == pygame.K_UP and player_vel_y == 0:
-                player_vel_y = -size
-                player_vel_x = 0
-            if event.key == pygame.K_DOWN and player_vel_y == 0:
-                player_vel_y = size
-                player_vel_x = 0
-            if event.key == pygame.K_ESCAPE:
-                game_state = 2
+
+            if game_state == 1: 
+                if event.key == pygame.K_LEFT and player_vel_x == 0:
+                    player_vel_x = -size
+                    player_vel_y = 0
+                if event.key == pygame.K_RIGHT and player_vel_x == 0:
+                    player_vel_x = size
+                    player_vel_y = 0
+                if event.key == pygame.K_UP and player_vel_y == 0:
+                    player_vel_y = -size
+                    player_vel_x = 0
+                if event.key == pygame.K_DOWN and player_vel_y == 0:
+                    player_vel_y = size
+                    player_vel_x = 0
+                if event.key == pygame.K_ESCAPE:
+                    game_state = 2
+
+            elif game_state == 2:
+                if event.key == pygame.K_SPACE:
+                    score = 0
+                    text = font.render(f'Score: {score}', True, (255, 0, 0))
+                    player_vel_x = 0
+                    player_vel_y = 0
+                    snake_segments = [[size, size]]
+                    object_x = random.randint(0, 800 - 100)
+                    object_y = random.randint(0, 600 - 100)
+                    game_state = 1
+
+                elif event.key == pygame.K_ESCAPE:
+                    print("Game Over")
+                    print(f"Score: {score}")
+                    pygame.quit()
+                    sys.exit()
 
     if collision_detection():
         object_y = random.randint(0, 800 - 100)
         object_x = random.randint(0, 800 - 100)
         score += 50
+
+        text = font.render(f'Score: {score}', True, (255, 0, 0))
+        textRect = text.get_rect()
+        textRect.center = (800 // 2, 30)
 
         last_segment = snake_segments[-1]
         snake_segments.append([last_segment[0], last_segment[1]])
@@ -82,6 +110,7 @@ while True:
         
     #output
     window.fill((255,255,255))
+    window.blit(text, textRect)
     if game_state == 1:
 
         player_x, player_y = snake_segments[0]
@@ -111,14 +140,7 @@ while True:
                 window.blit(player, (pos[0], pos[1]))
             else:
                 window.blit(adder, (pos[0], pos[1]))
-
-    elif game_state == 2:
-        print("Game Over")
-        print(f"Score: {score}")
-        pygame.quit()
-        sys.exit()
-
-        
+  
     pygame.display.flip()
 
 
