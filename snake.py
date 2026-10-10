@@ -1,7 +1,9 @@
 import pygame
 import random
+import sys
 
 score = 0
+size = 40
 
 pygame.init()
 
@@ -9,66 +11,71 @@ window = pygame.display.set_mode((800, 600))
 window.fill((255,255,255))
 pygame.display.set_caption("Snake Game")
 
-player = pygame.surface.Surface((100,100))
+player = pygame.surface.Surface((size, size))
 player.fill((0,255,0))
 
-adder = pygame.surface.Surface((100,50))
+adder = pygame.surface.Surface((size, size))
 adder.fill((0,0,255))
 
-player_x=0
-player_y=0
+snake_segments = [[size, size]]
+
+move_timer = 0
+delay = 200
 
 player_vel_x=0
 player_vel_y=0
 
-adder_x = -100
-adder_y = 0
-
 falling_object = pygame.surface.Surface((50,50))
 falling_object.fill((0,0,0))
 
-falling_object_x = 0
+falling_object_x = random.randint(0, 800 - 100)
 falling_object_y = 0
 falling_object_vel_x = 0
 falling_object_vel_y = 0
 
+player_x, player_y = snake_segments[0]
+
 def collision_detection():
-    return (player_x <= (falling_object_x + int(falling_object.width)) and
-            (player_x + player.width) >= falling_object_x and
-            player_y <= (falling_object_y + falling_object.height + 5) and 
-            (player_y + player.height) >= falling_object_y)
+    player_x, player_y = snake_segments[0]
+    return (player_x <= (falling_object_x + int(falling_object.get_width())) and
+            (player_x + player.get_width()) >= falling_object_x and
+            player_y <= (falling_object_y + falling_object.get_height() + 5) and 
+            (player_y + player.get_height()) >= falling_object_y)
 
 game_state = 1
 
+clock = pygame.time.Clock()
+
 while True:
+    dt = clock.tick(60)
     #take input
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             quit(0)
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
-                player_vel_x = -0.5
+            if event.key == pygame.K_LEFT and player_vel_x == 0:
+                player_vel_x = -size
                 player_vel_y = 0
-            if event.key == pygame.K_RIGHT:
-                player_vel_x = 0.5
+            if event.key == pygame.K_RIGHT and player_vel_x == 0:
+                player_vel_x = size
                 player_vel_y = 0
-            if event.key == pygame.K_UP:
-                player_vel_y = -0.5
+            if event.key == pygame.K_UP and player_vel_y == 0:
+                player_vel_y = -size
                 player_vel_x = 0
-            if event.key == pygame.K_DOWN:
-                player_vel_y = 0.5
+            if event.key == pygame.K_DOWN and player_vel_y == 0:
+                player_vel_y = size
                 player_vel_x = 0
             if event.key == pygame.K_ESCAPE:
                 game_state = 2
-        else: 
-            player_vel_x = 0
-            player_vel_y = 0
 
     if collision_detection():
-        falling_object_y = random.randint(0, window.width - 50)
-        falling_object_x = random.randint(0, window.width - 50)
+        falling_object_y = random.randint(0, 800 - 100)
+        falling_object_x = random.randint(0, 800 - 100)
         score += 50
+
+        last_segment = snake_segments[-1]
+        snake_segments.append([last_segment[0], last_segment[1]])
 
     if falling_object_y >= 600:
         falling_object_y = 100
@@ -76,36 +83,42 @@ while True:
     #output
     window.fill((255,255,255))
     if game_state == 1:
-        player_x += player_vel_x
-        player_y += player_vel_y
 
-        if player_vel_x > 0:
-            adder_x = player_x - player.get_width()
-            adder_y = player_y
+        player_x, player_y = snake_segments[0]
 
-        if player_vel_x < 0:
-            adder_x = player_x + player.get_width()
-            adder_y = player_y
-
-        if player_vel_y > 0:
-            adder_x = player_x
-            adder_y = player_y - player.get_height()
-
-        if player_vel_y < 0:
-            adder_x = player_x
-            adder_y = player_y + player.get_height()
-
-        window.blit(adder, (adder_x, adder_y))
-        window.blit(player, (player_x,player_y))
-
+        if player_x < 0 or player_x > 800 or player_y < 0 or player_y > 600:
+            game_state = 2
 
         falling_object_x += falling_object_vel_x
         falling_object_y += falling_object_vel_y
         window.blit(falling_object, (falling_object_x,falling_object_y))
 
+        move_timer += dt
+        if move_timer >= delay:
+            move_timer = 0
+
+            if player_vel_x != 0 or player_vel_y != 0:
+
+                for i in range(len(snake_segments)-1,0,-1):
+                    snake_segments[i][0] = snake_segments[i-1][0]
+                    snake_segments[i][1] = snake_segments[i-1][1]
+
+                snake_segments[0][0] += player_vel_x
+                snake_segments[0][1] += player_vel_y
+
+        for index, pos in enumerate(snake_segments):
+            if index == 0:
+                window.blit(player, (pos[0], pos[1]))
+            else:
+                window.blit(adder, (pos[0], pos[1]))
+
     elif game_state == 2:
         print("Game Over")
         print(f"Score: {score}")
+        pygame.quit()
+        sys.exit()
+
+        
     pygame.display.flip()
 
 
