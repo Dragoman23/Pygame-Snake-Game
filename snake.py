@@ -25,22 +25,22 @@ delay = 200
 player_vel_x=0
 player_vel_y=0
 
-falling_object = pygame.surface.Surface((50,50))
-falling_object.fill((0,0,0))
+object = pygame.surface.Surface((50,50))
+object.fill((0,0,0))
 
-falling_object_x = random.randint(0, 800 - 100)
-falling_object_y = 0
-falling_object_vel_x = 0
-falling_object_vel_y = 0
+object_x = random.randint(0, 800 - 100)
+object_y = 0
+object_vel_x = 0
+object_vel_y = 0
 
 player_x, player_y = snake_segments[0]
 
 def collision_detection():
     player_x, player_y = snake_segments[0]
-    return (player_x <= (falling_object_x + int(falling_object.get_width())) and
-            (player_x + player.get_width()) >= falling_object_x and
-            player_y <= (falling_object_y + falling_object.get_height() + 5) and 
-            (player_y + player.get_height()) >= falling_object_y)
+    return (player_x <= (object_x + int(object.get_width())) and
+            (player_x + player.get_width()) >= object_x and
+            player_y <= (object_y + object.get_height() + 5) and 
+            (player_y + player.get_height()) >= object_y)
 
 game_state = 1
 
@@ -70,15 +70,15 @@ while True:
                 game_state = 2
 
     if collision_detection():
-        falling_object_y = random.randint(0, 800 - 100)
-        falling_object_x = random.randint(0, 800 - 100)
+        object_y = random.randint(0, 800 - 100)
+        object_x = random.randint(0, 800 - 100)
         score += 50
 
         last_segment = snake_segments[-1]
         snake_segments.append([last_segment[0], last_segment[1]])
 
-    if falling_object_y >= 600:
-        falling_object_y = 100
+    if object_y >= 600:
+        object_y = 100
         
     #output
     window.fill((255,255,255))
@@ -89,9 +89,9 @@ while True:
         if player_x < 0 or player_x > 800 or player_y < 0 or player_y > 600:
             game_state = 2
 
-        falling_object_x += falling_object_vel_x
-        falling_object_y += falling_object_vel_y
-        window.blit(falling_object, (falling_object_x,falling_object_y))
+        object_x += object_vel_x
+        object_y += object_vel_y
+        window.blit(object, (object_x,object_y))
 
         move_timer += dt
         if move_timer >= delay:
